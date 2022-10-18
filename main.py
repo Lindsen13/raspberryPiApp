@@ -1,6 +1,7 @@
 import os
 from flask import Flask
 from sqlalchemy import create_engine
+from utils import read_temperature
 
 app = Flask(__name__)
 
@@ -10,6 +11,10 @@ def index():
     with engine.connect() as conn:
         data = conn.execute("SELECT * FROM tmp.tmp").fetchall()
     return f"Hello world!, {dict(data)}"
+
+@app.route('/temperature')
+def temperature():
+    return {"temperature":read_temperature()}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

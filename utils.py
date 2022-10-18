@@ -1,5 +1,7 @@
-import os
+from sqlalchemy import create_engine
 import glob
+import os
+
  
 def read_temperature() -> float:
     if os.environ.get('local') == 'true':
@@ -16,3 +18,6 @@ def read_temperature() -> float:
             data = f.read()
         temperature = int(data.split('t=')[-1].strip()) / 1000
     return temperature
+
+def construct_engine():
+    return create_engine(f"mysql+pymysql://{os.environ.get('mysql_user')}:{os.environ.get('mysql_password')}@{os.environ.get('mysql_host')}:{os.environ.get('mysql_port')}/{os.environ.get('mysql_database')}?charset=utf8mb4")

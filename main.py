@@ -1,20 +1,29 @@
-import os
 from flask import Flask
-from sqlalchemy import create_engine
-from utils import read_temperature
+from sqlalchemy.orm import Session
+from utils import read_temperature, construct_engine
+from db import Iot_data
 
 app = Flask(__name__)
 
+engine = construct_engine()
+
 @app.route('/', methods=["GET"])
 def index():
-    engine = create_engine(f"mysql+pymysql://{os.environ.get('mysql_user')}:{os.environ.get('mysql_password')}@{os.environ.get('mysql_host')}:{os.environ.get('mysql_port')}?charset=utf8mb4")
-    with engine.connect() as conn:
-        data = conn.execute("SELECT * FROM tmp.tmp").fetchall()
-    return f"Hello world!, {dict(data)}"
+    return f"Hello world!"
 
 @app.route('/temperature')
 def temperature():
-    return {"temperature":read_temperature()}
+    temperature = read_temperature()
+    with Session(engine) as session:
+        temperature_value = Iot_data(
+            name = 'Temperature',
+            value = temperature
+        )
+
+        session.add(temperature_value)
+        session.commit()
+    print('Stored temperature!')
+    return {"temperature":temperature}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

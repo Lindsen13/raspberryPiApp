@@ -8,11 +8,11 @@ app = Flask(__name__)
 engine = construct_engine()
 
 @app.route('/', methods=["GET"])
-def index():
+def index() -> str:
     return f"Hello world!"
 
 @app.route('/temperature')
-def temperature():
+def temperature() -> dict[str,float]:
     temperature = read_temperature()
     with Session(engine) as session:
         temperature_value = Iot_data(

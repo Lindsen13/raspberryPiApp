@@ -2,6 +2,7 @@ from sqlalchemy import create_engine, engine
 from bs4 import BeautifulSoup
 import requests
 import datetime
+import pytz
 import json
 import glob
 import os
@@ -30,7 +31,8 @@ def read_electricity_price() -> float:
 
     data = json.loads(soup.find(id='chart-component').get('data-chart'))
     data['east']['values'][-(24-datetime.datetime.now().hour)]
-    hourly_price = data.get('east',{}).get('values',[])[-(24-datetime.datetime.now().hour)]
+    hours_offset = -(24-datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).hour)
+    hourly_price = data.get('east',{}).get('values',[])[hours_offset]
     hourly_price = int(hourly_price.replace('.',''))/100
     return hourly_price
 

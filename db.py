@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, Float, String, DateTime
 from sqlalchemy.orm import declarative_base
 from utils import construct_engine
 import datetime
-
+import pytz
 Base = declarative_base()
 
 engine = construct_engine()
@@ -13,7 +13,7 @@ class Iot_data(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(30))
     value = Column(Float)
-    inserted_at = Column(DateTime, default=datetime.datetime.utcnow)
+    inserted_at = Column(DateTime, default=datetime.datetime.now(pytz.timezone('Europe/Copenhagen')))
     
     def __repr__(self):
         return f"iot_data(id={self.id!r}, name={self.name!r}, value={self.fullname!r})"

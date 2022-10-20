@@ -1,6 +1,7 @@
+import datetime
 from flask import Flask
 from sqlalchemy.orm import Session
-from utils import read_temperature, construct_engine
+from utils import read_temperature, construct_engine, read_electricity_price
 from db import Iot_data
 
 app = Flask(__name__)
@@ -24,6 +25,20 @@ def temperature() -> dict[str,float]:
         session.commit()
     print('Stored temperature!')
     return {"temperature":temperature}
+
+@app.route('/electricity_price')
+def electricity_price() -> dict[str, float]:
+    el_price = read_electricity_price()
+    with Session(engine) as session:
+        electricity_price_value = Iot_data(
+            name = 'Electricity Price',
+            value = el_price
+        )
+
+        session.add(electricity_price_value)
+        session.commit()
+    print('Stored electricty price!')
+    return {"electricy price":el_price, "datatime":str(datetime.datetime.now())}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')

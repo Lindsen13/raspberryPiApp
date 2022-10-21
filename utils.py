@@ -21,6 +21,16 @@ def read_temperature() -> float:
         temperature = int(data.split('t=')[-1].strip()) / 1000
     return temperature
 
+def read_internal_temperature() -> float:
+    if os.environ.get('local') == 'true':
+        # Return -1 when we're developing locally.
+        return float(-1)
+    else:
+        # Return temperature fetched from sensor.
+        internal_temp =  os.popen('vcgencmd measure_temp').read()
+        internal_temp = internal_temp.split("'")[0].split('=')[-1]
+        return int(internal_temp.replace('.',''))/10
+
 def read_electricity_price() -> float:
     url = 'https://andelenergi.dk/kundeservice/aftaler-og-priser/timepris/'
 

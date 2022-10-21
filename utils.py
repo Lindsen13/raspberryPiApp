@@ -37,18 +37,45 @@ def read_electricity_price() -> float:
     output = requests.get(url)
 
     soup = BeautifulSoup(output.text, 'html.parser')
-    soup.find(id='chart-component').get('data-chart')
-
     data = json.loads(soup.find(id='chart-component').get('data-chart'))
-    data['east']['values'][-(24-datetime.datetime.now().hour)]
+    
     hours_offset = -(24-datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).hour)
     hourly_price = data.get('east',{}).get('values',[])[hours_offset]
     hourly_price = int(hourly_price.replace('.',''))/100
     return hourly_price
 
+def read_future_electicity_price() -> list[dict[str,datetime.datetime|float]]:
+    url = 'https://andelenergi.dk/kundeservice/aftaler-og-priser/timepris/'
 
+    output = requests.get(url)
 
+    soup = BeautifulSoup(output.text, 'html.parser')
+    data = json.loads(soup.find(id='chart-component').get('data-chart'))
 
+    data = data['east']['values'][-24:]
+    output = []
+    for hour, temp in enumerate(data):
+        output.append(
+            {
+                'date':datetime.datetime(
+                    year = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).year, 
+                    month = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).month, 
+                    day = datetime.datetime.now(pytz.timezone('Europe/Copenhagen')).day, 
+                    hour = hour, 
+                    minute = 0, 
+                    second = 0,
+                    tzinfo=pytz.timezone('Europe/Copenhagen')
+                ),
+                'electricity_price':int(temp.replace('.',''))/100
+            }
+        )
+        
+    return output
 
 def construct_engine() -> engine.Engine:
-    return create_engine(f"mysql+pymysql://{os.environ.get('mysql_user')}:{os.environ.get('mysql_password')}@{os.environ.get('mysql_host')}:{os.environ.get('mysql_port')}/{os.environ.get('mysql_database')}?charset=utf8mb4")
+    user = os.environ.get('mysql_user')
+    pw = os.environ.get('mysql_password')
+    host = os.environ.get('mysql_host')
+    port = os.environ.get('mysql_port')
+    db = os.environ.get('mysql_database')
+    return create_engine(f"mysql+pymysql://{user}:{pw}@{host}:{port}/{db}?charset=utf8mb4")

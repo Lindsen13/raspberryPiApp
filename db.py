@@ -16,7 +16,7 @@ class Iot_data(Base):
     inserted_at = Column(DateTime, default=datetime.datetime.now(pytz.timezone('Europe/Copenhagen')))
     
     def __repr__(self):
-        return f"iot_data(id={self.id!r}, name={self.name!r}, value={self.fullname!r})"
+        return f"iot_data(id={self.id!r}, name={self.name!r}, value={self.value!r})"
 
 if __name__ == '__main__':
     #Iot_data.metadata.drop_all(engine)
